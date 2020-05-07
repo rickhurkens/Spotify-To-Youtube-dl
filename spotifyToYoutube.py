@@ -1,5 +1,7 @@
 #coding: utf-8
 import json
+# System stuff
+import pathlib
 # Spotify library.
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
@@ -10,37 +12,50 @@ import bs4
 import youtube
 
 # Opening our JSON configuration file (which has our tokens).
-with open("config.json", encoding='utf-8-sig') as json_file:
+with open(pathlib.Path(__file__).parent / 'config.json', encoding='utf-8-sig') as json_file:
     APIs = json.load(json_file)
 
-def getTracks(playlistURL):
+def getTracks(playlistId):
+    return getTracksWithoutThoseNamedInString(playlistId, "")
+
+def getTracksWithoutThoseNamedInString(playlistId, string):
+
     # Creating and authenticating our Spotify app.
     client_credentials_manager = SpotifyClientCredentials(APIs["spotify"]["client_id"], APIs["spotify"]["client_secret"])
     spotify = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
     # Getting a playlist.
-    results = spotify.user_playlist_tracks(user="",playlist_id=playlistURL)
+    playlist = spotify.user_playlist(user="",playlist_id=playlistId)
+    print("\nDownloading playlist '" + playlist["name"] + "'")
 
-    trackList = [];
-    # For each track in the playlist.
-    for i in results["tracks"]["items"]:
-        # In case there's only one artist.
-        if (i["track"]["artists"].__len__() == 1):
-            # We add trackName - artist.
-            trackList.append(i["track"]["name"] + " - " + i["track"]["artists"][0]["name"])
-        # In case there's more than one artist.
-        else:
-            nameString = "";
-            # For each artist in the track.
-            for index, b in enumerate(i["track"]["artists"]):
-                nameString += (b["name"]);
-                # If it isn't the last artist.
-                if (i["track"]["artists"].__len__() - 1 != index):
-                    nameString += ", ";
-            # Adding the track to the list.
-            trackList.append(i["track"]["name"] + " - " + nameString);
+    # Getting the tracks.
+    results = playlist["tracks"]
+
+    trackList = {};
+    # For each track in the playlist
+    for i in playlist["tracks"]["items"]:
+        track = i["track"]
+        title = track["name"]
+
+        # For each artist in the track.
+        artistName = ""
+        for index, artist in enumerate(track["artists"]):
+            artistName += (artist["name"])
+            # If it isn't the last artist.
+            if (track["artists"].__len__() - 1 != index):
+                artistName += ", "
+
+        titleString = artistName + " - " + title
+        # If this song title is already in current directory, do nothing
+        if (titleString in string):
+            print("Not downloading because of title match: " + titleString)
+            continue
+        
+        # Adding the track to the list.
+        trackList[titleString] = {"artist": artistName, "title": title}
 
     return trackList;
+
 
 def searchYoutubeAlternative(songName):
     # YouTube will block you if you query too many songs using this search.
@@ -58,6 +73,9 @@ def searchYoutube(songName):
               client_secret=APIs["youtube"]["client_secret"],
               api_key=APIs["youtube"]["api_key"]);
     video = api.get('search', q=songName, maxResults=1, type='video', order='relevance');
+    if (len(video["items"]) <  1):
+        print("Could not find youtube video for " + songName)
+        return None
     return("https://www.youtube.com/watch?v="+video["items"][0]["id"]["videoId"]);
 
 if (__name__ == "__main__"):
