@@ -40,3 +40,9 @@ I used the following libraries:<br>
 
 # Why did you make it?
 Studying purpouses, and it might actually be useful to someone. I think <a href="http://discord.app">Discord</a> bots could use that to queue songs and stuff. 
+
+# Contribute?
+This project needs:
+  - Handling of errors
+  - Output of logs
+  - Refactoring
