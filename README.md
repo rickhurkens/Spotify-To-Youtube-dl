@@ -6,8 +6,9 @@ A simplistic way to find songs from a Spotify playlist on YouTube and download t
 All you gotta do is insert your <b> >>PUBLIC<< </b> <a href="http://www.spotify.com">Spotify</a> playlist URL or ID when prompted, then the app will automatically search all songs from that playlist on <a href="http://youtube.com">YouTube</a> and return the URLs. Youtube-dl will download them. Check below for instructions on how to make it work:
 
 # Prerequisites:
-youtube-dl
-ffmpeg
+youtube-dl<br>
+ffmpeg<br>
+mutagen easyid3
 
 # How to use it?
 1 - To use the script, you gotta register your app on both the Spotify and YouTube API services.<br>
@@ -33,7 +34,9 @@ ffmpeg
 I used the following libraries:<br>
   - <a href="https://github.com/plamere/spotipy">Spotipy (For handling the Spotify API)</a>
   - <a href="https://github.com/rohitkhatri/youtube-python">YouTube Python (For handling the YouTube API)</a>
-  - <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">Beautiful Soup (For the YouTube alternative search)</a><br><br>
+  - <a href="https://www.crummy.com/software/BeautifulSoup/bs4/doc/">Beautiful Soup (For the YouTube alternative search)</a>
+  - <a href="https://github.com/ytdl-org/youtube-dl">youtube-dl (For the youtube download)</a>
+  - <a href="https://github.com/quodlibet/mutagen/blob/master/mutagen/easyid3.py">Mutagen EasyID3 (For the metadata tagging)</a><br><br>
 
 # Why did you make it?
 Studying purpouses, and it might actually be useful to someone. I think <a href="http://discord.app">Discord</a> bots could use that to queue songs and stuff. 
