@@ -1,6 +1,12 @@
 from __future__ import unicode_literals
-from spotifyToYoutube import getTracksWithoutThoseNamedInString, searchYoutube
+import mutagen
+from mutagen.mp3 import MP3
+from mutagen.easyid3 import EasyID3
+import mutagen.id3
+from mutagen.id3 import ID3
 import youtube_dl, os, string, sys
+from track import Track
+from spotifyToYoutube import getTracksWithoutThoseNamedInString, searchYoutube
 
 
 class MyLogger(object):
@@ -12,6 +18,7 @@ class MyLogger(object):
 
     def error(self, msg):
         print(msg)
+
 
 
 def my_hook(d):
@@ -38,14 +45,20 @@ if (__name__ == "__main__"):
     tracks = getTracksWithoutThoseNamedInString(playlistId, filenames)
 
     if len(tracks) > 0:
-        print("Searching and downloading songs...")
-        for trackTitle,trackData in tracks.items():
-            songUrl = searchYoutube(trackTitle)
+        print("\nSearching and downloading songs...")
+        for track in tracks:
+            songUrl = searchYoutube(track.titleString())
             if songUrl is not None:
-                print('\nDownloading '+trackTitle)
-                os.system('youtube-dl -x --output "'+trackTitle+'.%(ext)s" --audio-format mp3 '+songUrl)
+                print('\nDownloading '+track.titleString())
+                os.system('youtube-dl -x --output "'+track.titleString()+'.%(ext)s" --audio-format mp3 '+songUrl)
 
-        # TODO: possibly use from mutagen.easyid3 import EasyID3 for metatagging
-        # then we'd need to create an object with also artist (String) and title (String)
+                # metatagging
+                mp3file = MP3(track.titleString() + '.mp3', ID3=EasyID3)
+                print(mp3file)
 
+                mp3file['artist'] = [track.artist]
+                mp3file['title'] = [track.title]
+                mp3file['album'] = [track.album]
+                mp3file.save()
+        
     print("\nFinished!\n")

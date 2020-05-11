@@ -10,6 +10,8 @@ import urllib.request
 import bs4
 # Youtube stuff.
 import youtube
+# Dto
+from track import Track
 
 # Opening our JSON configuration file (which has our tokens).
 with open(pathlib.Path(__file__).parent / 'config.json', encoding='utf-8-sig') as json_file:
@@ -28,33 +30,31 @@ def getTracksWithoutThoseNamedInString(playlistId, string):
     playlist = spotify.user_playlist(user="",playlist_id=playlistId)
     print("\nDownloading playlist '" + playlist["name"] + "'")
 
-    # Getting the tracks.
-    results = playlist["tracks"]
-
-    trackList = {};
+    tracks = []
     # For each track in the playlist
     for i in playlist["tracks"]["items"]:
-        track = i["track"]
-        title = track["name"]
+        title = i["track"]["name"]
+        album = i["track"]["album"]["name"]
 
         # For each artist in the track.
         artistName = ""
-        for index, artist in enumerate(track["artists"]):
+        for index, artist in enumerate(i["track"]["artists"]):
             artistName += (artist["name"])
             # If it isn't the last artist.
-            if (track["artists"].__len__() - 1 != index):
+            if (i["track"]["artists"].__len__() - 1 != index):
                 artistName += ", "
 
-        titleString = artistName + " - " + title
+        track = Track(artistName, title, album)
+
         # If this song title is already in current directory, do nothing
-        if (titleString in string):
-            print("Not downloading because of title match: " + titleString)
+        if (track.titleString() in string):
+            print("Not downloading because of title match: " + track.titleString())
             continue
         
         # Adding the track to the list.
-        trackList[titleString] = {"artist": artistName, "title": title}
+        tracks.append(track)
 
-    return trackList;
+    return tracks
 
 
 def searchYoutubeAlternative(songName):
